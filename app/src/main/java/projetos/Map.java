@@ -7,40 +7,35 @@ public class Map {
     private final int mapX = 8, mapY = 8, mapS = 64;
     private final int[] map = {
             1, 1, 1, 1, 1, 1, 1, 1,
-            1, 0, 1, 0, 0, 0, 0, 1,
-            1, 0, 1, 0, 0, 0, 0, 1,
-            1, 0, 1, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 1, 1, 1,
+            1, 0, 1, 0, 0, 0, 0, 1,
+            1, 0, 1, 1, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 1, 0, 1,
             1, 0, 0, 0, 0, 0, 0, 1,
             1, 1, 1, 1, 1, 1, 1, 1
     };
 
-    public void drawMap2D(Player player) {
-        for (int y = 0; y < mapY; y++) {
-            for (int x = 0; x < mapX; x++) {
-                if (map[y * mapX + x] == 1) {
-                    GL11.glColor3f(1, 1, 1);
-                } else {
-                    GL11.glColor3f(0, 0, 0);
-                }
-
-                int xo = x * mapS;
-                int yo = y * mapS;
-
-                GL11.glBegin(GL11.GL_QUADS);
-                GL11.glVertex2i(xo + 1, yo + 1);
-                GL11.glVertex2i(xo + 1, yo + mapS - 1);
-                GL11.glVertex2i(xo + mapS - 1, yo + mapS - 1);
-                GL11.glVertex2i(xo + mapS - 1, yo + 1);
-                GL11.glEnd();
-            }
-        }
-        player.drawPlayerOnMap(mapS);
-    }
-
+    /**
+     * Checks if the given coordinates are within the map bounds.
+     * @param mx The x-coordinate to check.
+     * @param my The y-coordinate to check.
+     * @return True if the coordinates are within bounds, false otherwise.
+     */
     public boolean inBounds(int mx, int my) {
         return mx >= 0 && mx < mapX && my >= 0 && my < mapY;
+    }
+
+    /**
+     * Checks if the given position is a wall.
+     * @param x The x-coordinate to check.
+     * @param y The y-coordinate to check.
+     * @return True if the position is a wall, false otherwise.
+     */
+    public boolean isWall(float x, float y) {
+        int mx = (int) x / mapS;
+        int my = (int) y / mapS;
+        return map[my * mapX + mx] == 1;
     }
 
     public int getMapX() {

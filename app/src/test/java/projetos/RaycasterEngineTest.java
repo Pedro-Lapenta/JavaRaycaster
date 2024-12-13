@@ -5,11 +5,33 @@ package projetos;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import static projetos.Player.PI; // Import the PI constant
 
 public class RaycasterEngineTest {
     @Test
     public void testRaycasterEngineInitialization() {
         RaycasterEngine engine = new RaycasterEngine();
         assertNotNull(engine, "RaycasterEngine should be initialized");
+    }
+
+    @Test
+    public void testPlayerInitialization() {
+        Map map = new Map();
+        Player player = new Player(300, 300, 0, map); // Pass the map to the player
+        assertNotNull(player);
+    }
+
+    @Test
+    public void testPlayerMovement() {
+        Map map = new Map();
+        Player player = new Player(300, 300, 0, map); // Pass the map to the player
+        player.moveForward();
+        assertEquals(300 + (float) Math.cos(0), player.getPx(), "Player should move forward");
+        player.moveBackward();
+        assertEquals(300, player.getPx(), "Player should move backward");
+        player.strafeLeft();
+        assertEquals(300 + (float) Math.cos(-PI / 2), player.getPx(), "Player should strafe left");
+        player.strafeRight();
+        assertEquals(300, player.getPx(), "Player should strafe right");
     }
 }

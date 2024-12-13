@@ -1,6 +1,7 @@
 package projetos;
 
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 
@@ -15,12 +16,17 @@ public class RaycasterEngine {
         new RaycasterEngine().run();
     }
 
+    /**
+     * Initializes GLFW, creates the window, and starts the game loop.
+     */
     public void run() {
         if (!GLFW.glfwInit()) {
             throw new IllegalStateException("Unable to initialize GLFW");
         }
 
-        window = GLFW.glfwCreateWindow(1024, 512, "Raycaster Engine", 0, 0);
+        GLFW.glfwWindowHint(GLFW.GLFW_DECORATED, GLFW.GLFW_FALSE); // Remove window decorations
+        GLFWVidMode vidMode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
+        window = GLFW.glfwCreateWindow(vidMode.width(), vidMode.height(), "Raycaster Engine", GLFW.glfwGetPrimaryMonitor(), 0);
         if (window == 0) {
             throw new RuntimeException("Failed to create the GLFW window");
         }
@@ -44,27 +50,39 @@ public class RaycasterEngine {
         GLFW.glfwTerminate();
     }
 
+    /**
+     * Initializes OpenGL settings and game objects.
+     */
     private void init() {
         GL11.glClearColor(0.3f, 0.3f, 0.3f, 0);
-        GL11.glOrtho(0, 1024, 512, 0, -1, 1);
+        GLFWVidMode videoMode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
+        GL11.glViewport(0, 0, videoMode.width(), videoMode.height());
+        GL11.glOrtho(0, videoMode.width(), videoMode.height(), 0, -1, 1);
 
-        player = new Player(300, 300, 0);
-        map = new Map();
+        map = new Map(); // Initialize the map before using it
+        player = new Player(3 * map.getMapS(), 3 * map.getMapS(), 0, map); // Pass the map to the player
         raycaster = new Raycaster(map, player);
     }
 
+    /**
+     * Updates game logic, including handling input.
+     */
     private void update() {
         handleInput();
         // Other update logic
     }
 
+    /**
+     * Renders the game objects.
+     */
     private void render() {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-        map.drawMap2D(player);
         raycaster.drawRays2D();
-        player.drawPlayer();
     }
 
+    /**
+     * Handles keyboard and mouse input.
+     */
     private void handleInput() {
         // Keyboard input for movement
         if (GLFW.glfwGetKey(window, GLFW.GLFW_KEY_W) == GLFW.GLFW_PRESS) {
@@ -80,11 +98,19 @@ public class RaycasterEngine {
             player.strafeRight();
         }
 
+        // Quit the game when ESC is pressed
+        if (GLFW.glfwGetKey(window, GLFW.GLFW_KEY_ESCAPE) == GLFW.GLFW_PRESS) {
+            GLFW.glfwSetWindowShouldClose(window, true);
+        }
+
         // Mouse input for looking around
         double[] mouseX = new double[1];
         double[] mouseY = new double[1];
         GLFW.glfwGetCursorPos(window, mouseX, mouseY);
-        player.lookAround(mouseX[0] - 512);
-        GLFW.glfwSetCursorPos(window, 512, 256); // Reset the cursor to the center of the window
+        GLFWVidMode videoMode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
+        double centerX = videoMode.width() / 2.0;
+        double centerY = videoMode.height() / 2.0;
+        player.lookAround(mouseX[0] - centerX, mouseY[0] - centerY);
+        GLFW.glfwSetCursorPos(window, centerX, centerY); // Reset the cursor to the center of the window
     }
 }
